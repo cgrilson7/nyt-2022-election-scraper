@@ -59,7 +59,7 @@ def fetch_all_records():
                     continue
         blob = git_show(ref, 'results.json', repo)
         json = parser.parse(blob)
-        timestamp = json['meta']['timestamp']
+        timestamp = json['resultsMeta']['resultsUpdatedAt']
         rows = []
         for index in STATE_INDEXES:
             race = json['data']['races'][index]
