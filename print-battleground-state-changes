@@ -23,7 +23,7 @@ NV_INDEX = 33
 PA_INDEX = 38
 
 BATTLEGROUND_STATES = ["Alaska", "Arizona", "Georgia", "North Carolina", "Nevada", "Pennsylvania"]
-STATE_INDEXES = range(51) # 50 States + DC
+STATE_INDEXES = range(34) # 50 States + DC
 
 CACHE_DIR = '_cache'
 # Bump this with any changes to `fetch_all_records`
@@ -62,9 +62,9 @@ def fetch_all_records():
         timestamp = json['resultsMeta']['resultsUpdatedAt']
         rows = []
         for index in STATE_INDEXES:
-            race = json['data']['races'][index]
+            race = json['races'][index]
 
-            county_tot_exp_vote = [county['tot_exp_vote'] for county in race['counties']]
+            county_tot_exp_vote = [county['total_expected_vote'] for county in race['reporting_units']]
             if all(county_tot_exp_vote):
                 tot_exp_vote = sum(county_tot_exp_vote)
             else:
@@ -72,19 +72,19 @@ def fetch_all_records():
                 # estimate for the following states: Connecticut, Massachusetts,
                 # Maine, New Hampshire, Rhode Island, and Vermont. So we have to
                 # fall back to the state wide one.
-                tot_exp_vote = race['tot_exp_vote']
+                tot_exp_vote = race['top_reporting_unit']['tot_expected_vote']
 
             record = InputRecord(
                 timestamp,
-                race['state_name'],
-                race['state_id'],
-                race['electoral_votes'],
-                race['candidates'].as_list(),
-                race['votes'],
+                race['top_reporting_unit']['name'],
+                race['top_reporting_unit']['state_postal'],
+                '0',
+                race['top_reporting_unit']['candidates'].as_list(),
+                race['top_reporting_unit']['total_votes'],
                 tot_exp_vote,
-                race['precincts_total'],
-                race['precincts_reporting'],
-                {n['name']: n['votes'] for n in race['counties']},
+                race['top_reporting_unit']['precincts_total'],
+                race['top_reporting_unit']['precincts_reporting'],
+                {n['name']: n['total_votes'] for n in race['reporting_units']},
             )
             rows.append(record)
             out.append(record)
