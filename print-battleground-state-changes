@@ -15,15 +15,14 @@ from textwrap import dedent, indent
 from tabulate import tabulate
 from typing import Dict, Tuple
 
-AK_INDEX = 0
-AZ_INDEX = 3
-GA_INDEX = 10
-NC_INDEX = 27
-NV_INDEX = 33
-PA_INDEX = 38
+AK_INDEX = 1
+AZ_INDEX = 2
+GA_INDEX = 8
+NV_INDEX = 19
+PA_INDEX = 28
 
-BATTLEGROUND_STATES = ["Alaska", "Arizona", "Georgia", "North Carolina", "Nevada", "Pennsylvania"]
-STATE_INDEXES = range(34) # 50 States + DC
+BATTLEGROUND_STATES = ["Alaska", "Arizona", "Georgia", "Nevada", "Pennsylvania"]
+STATE_INDEXES = range(34) # 34 states with a Senate election in 2022
 
 CACHE_DIR = '_cache'
 # Bump this with any changes to `fetch_all_records`
@@ -59,7 +58,7 @@ def fetch_all_records():
                     continue
         blob = git_show(ref, 'results.json', repo)
         json = parser.parse(blob)
-        timestamp = json['resultsMeta']['resultsUpdatedAt']
+        # timestamp = json['resultsMeta']['resultsUpdatedAt']
         rows = []
         for index in STATE_INDEXES:
             race = json['races'][index]
@@ -75,10 +74,10 @@ def fetch_all_records():
                 tot_exp_vote = race['top_reporting_unit']['tot_expected_vote']
 
             record = InputRecord(
-                timestamp,
+                race['updated_at'],
                 race['top_reporting_unit']['name'],
                 race['top_reporting_unit']['state_postal'],
-                '0',
+                race['max_winners'],
                 race['top_reporting_unit']['candidates'].as_list(),
                 race['top_reporting_unit']['total_votes'],
                 tot_exp_vote,
